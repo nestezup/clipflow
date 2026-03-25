@@ -63,11 +63,11 @@ struct ClipItemRow: View {
     var body: some View {
         HStack(spacing: 10) {
             // 번호 배지
-            Text("\(number)")
-                .font(.system(.caption, design: .monospaced, weight: .bold))
+            Text("⌥\(number)")
+                .font(.system(.caption2, design: .monospaced, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 22, height: 22)
-                .background(Circle().fill(.blue))
+                .frame(width: 28, height: 22)
+                .background(Capsule().fill(.blue))
 
             // 내용 미리보기
             VStack(alignment: .leading, spacing: 2) {

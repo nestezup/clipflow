@@ -78,7 +78,7 @@ final class HotkeyManager {
             hotKeyID.id = UInt32(i + 1)
 
             var ref: EventHotKeyRef?
-            RegisterEventHotKey(keyCode, 0, hotKeyID, GetApplicationEventTarget(), 0, &ref)
+            RegisterEventHotKey(keyCode, UInt32(optionKey), hotKeyID, GetApplicationEventTarget(), 0, &ref)
             itemHotKeyRefs.append(ref)
         }
 
