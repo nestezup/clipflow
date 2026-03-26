@@ -50,7 +50,7 @@ final class FloatingPanelController {
     }
 
     func hide() {
-        window?.close()
-        window = nil
+        // orderOut instead of close — keeps the panel alive, avoids NSHostingView rebuild
+        window?.orderOut(nil)
     }
 }

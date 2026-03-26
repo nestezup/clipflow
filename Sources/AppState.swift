@@ -1,4 +1,7 @@
 import SwiftUI
+import os.log
+
+private let logger = Logger(subsystem: "com.clipflow", category: "AppState")
 
 @MainActor
 final class AppState: ObservableObject {
@@ -11,6 +14,7 @@ final class AppState: ObservableObject {
     private var hotkeyManager: HotkeyManager?
     private var panelController: FloatingPanelController?
     private var isPasting = false
+    private var pasteResetTask: Task<Void, Never>?
 
     init() {
         panelController = FloatingPanelController(appState: self)
@@ -44,7 +48,6 @@ final class AppState: ObservableObject {
 
     func addItem(_ item: ClipItem) {
         guard !isPasting else { return }
-        // 중복 제거
         clipHistory.removeAll { $0.content == item.content }
         clipHistory.insert(item, at: 0)
         if clipHistory.count > maxHistory {
@@ -77,12 +80,20 @@ final class AppState: ObservableObject {
         guard index < clipHistory.count else { return }
         let item = clipHistory[index]
 
+        // Hide panel first (matches Maccy/Raycast behavior)
+        hidePanel()
+
+        // Cancel previous reset task to avoid race condition
+        pasteResetTask?.cancel()
+
         isPasting = true
         PasteHelper.paste(item.content)
 
-        Task {
+        pasteResetTask = Task {
             try? await Task.sleep(for: .milliseconds(500))
-            isPasting = false
+            if !Task.isCancelled {
+                isPasting = false
+            }
         }
     }
 

@@ -26,12 +26,11 @@ struct PanelView: View {
 
             if appState.clipHistory.isEmpty {
                 Spacer()
-                Text("클립보드 히스토리가 비어있습니다")
+                Text("텍스트 복사 또는 스크린샷을 찍어보세요")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 Spacer()
             } else {
-                // Clip list
                 ScrollView {
                     LazyVStack(spacing: 4) {
                         ForEach(Array(appState.clipHistory.prefix(9).enumerated()), id: \.element.id) { index, item in
@@ -69,29 +68,91 @@ struct ClipItemRow: View {
                 .frame(width: 28, height: 22)
                 .background(Capsule().fill(.blue))
 
-            // 내용 미리보기
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.content)
-                    .font(.system(.caption, design: .monospaced))
-                    .lineLimit(2)
-                    .truncationMode(.tail)
-
-                HStack(spacing: 4) {
-                    if let app = item.sourceApp {
-                        Text(app)
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                    Text(item.timestamp.formatted(.dateTime.hour().minute().second()))
-                        .font(.caption2)
-                        .foregroundStyle(.quaternary)
-                }
-            }
+            // 콘텐츠
+            contentView
 
             Spacer()
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
+        .frame(height: 68)
         .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        switch item.content {
+        case .text(let str):
+            textContentView(str)
+
+        case .image(_, let thumbnail, let size):
+            imageContentView(thumbnail: thumbnail, size: size)
+
+        case .richText:
+            placeholderView("Rich Text (coming soon)")
+
+        case .file(_, let name):
+            placeholderView("File: \(name) (coming soon)")
+        }
+    }
+
+    private func textContentView(_ str: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(str)
+                .font(.system(.caption, design: .monospaced))
+                .lineLimit(2)
+                .truncationMode(.tail)
+
+            metaView
+        }
+    }
+
+    private func imageContentView(thumbnail: NSImage, size: CGSize) -> some View {
+        HStack(spacing: 8) {
+            // 48x48 썸네일 (aspect-fill, center crop)
+            Image(nsImage: thumbnail)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 48, height: 48)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            VStack(alignment: .leading, spacing: 3) {
+                // IMAGE 타입 배지 (green, 구분용)
+                Text("IMAGE")
+                    .font(.system(.caption2, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Capsule().fill(.green))
+
+                Text("\(Int(size.width))×\(Int(size.height))")
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary)
+
+                metaView
+            }
+        }
+    }
+
+    private func placeholderView(_ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            metaView
+        }
+    }
+
+    private var metaView: some View {
+        HStack(spacing: 4) {
+            if let app = item.sourceApp {
+                Text(app)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            Text(item.timestamp.formatted(.dateTime.hour().minute().second()))
+                .font(.caption2)
+                .foregroundStyle(.quaternary)
+        }
     }
 }

@@ -31,9 +31,7 @@ struct MenuBarView: View {
                         HStack {
                             Text("\(index + 1).")
                                 .font(.caption.monospaced())
-                            Text(String(item.content.prefix(40)) + (item.content.count > 40 ? "..." : ""))
-                                .font(.caption)
-                                .lineLimit(1)
+                            itemLabel(for: item)
                         }
                     }
                 }
@@ -53,5 +51,35 @@ struct MenuBarView: View {
         }
         .padding(12)
         .frame(width: 260)
+    }
+
+    @ViewBuilder
+    private func itemLabel(for item: ClipItem) -> some View {
+        switch item.content {
+        case .text(let str):
+            Text(String(str.prefix(40)) + (str.count > 40 ? "..." : ""))
+                .font(.caption)
+                .lineLimit(1)
+
+        case .image(_, _, let size):
+            HStack(spacing: 4) {
+                Image(systemName: "photo")
+                    .font(.caption2)
+                    .foregroundStyle(.green)
+                Text("Image (\(Int(size.width))×\(Int(size.height)))")
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+
+        case .richText:
+            Text("Rich Text (coming soon)")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+        case .file(_, let name):
+            Text("File: \(name)")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
     }
 }
