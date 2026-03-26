@@ -80,10 +80,6 @@ final class AppState: ObservableObject {
         guard index < clipHistory.count else { return }
         let item = clipHistory[index]
 
-        // Hide panel first (matches Maccy/Raycast behavior)
-        hidePanel()
-
-        // Cancel previous reset task to avoid race condition
         pasteResetTask?.cancel()
 
         isPasting = true
