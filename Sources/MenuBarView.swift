@@ -24,12 +24,12 @@ struct MenuBarView: View {
             if !appState.clipHistory.isEmpty {
                 Divider()
 
-                ForEach(Array(appState.clipHistory.prefix(5).enumerated()), id: \.element.id) { index, item in
+                ForEach(Array(appState.visibleItems.prefix(5).enumerated()), id: \.element.id) { index, item in
                     Button {
                         appState.pasteItem(at: index)
                     } label: {
                         HStack {
-                            Text("\(index + 1).")
+                            Text("⌥\(index + 1)")
                                 .font(.caption.monospaced())
                             itemLabel(for: item)
                         }
